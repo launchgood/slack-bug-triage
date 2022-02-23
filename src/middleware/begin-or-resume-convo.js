@@ -12,10 +12,6 @@ export default async function beginOrResumeConvo(req) {
   } = req;
 
   try {
-    console.log('----------------------------------');
-    console.log('REQ:', Object.keys(req));
-    console.log('----------------------------------');
-
     const { conversation } = context;
 
     // conversation exists, do nothing
@@ -74,7 +70,5 @@ export default async function beginOrResumeConvo(req) {
     await next();
   } catch (err) {
     logger.error('Error while begin or resume convo:', err);
-    console.log('NEXT IS:', typeof next);
-    console.log(next);
   }
 }
