@@ -31,10 +31,16 @@
   },
   "homepage": "https://github.com/launchgood/slack-bug-triage#readme",
   "dependencies": {
+    "@actions/core": "^1.6.0",
+    "@actions/github": "^5.0.0",
     "@ladjs/env": "^3.0.0",
     "@slack/bolt": "^3.9.0",
+    "aws-sdk": "^2.1080.0",
+    "axios": "^0.26.0",
+    "change-case": "^4.1.2",
     "luxon": "^2.3.0",
-    "object-mapper": "^6.2.0"
+    "object-mapper": "^6.2.0",
+    "slack-block-builder": "^2.5.0"
   },
   "devDependencies": {
     "eslint": "^8.9.0",

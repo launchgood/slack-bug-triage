@@ -1,0 +1,139 @@
+{
+	"blocks": [
+		{
+			"type": "header",
+			"text": {
+				"type": "plain_text",
+				"text": "Opening the homepage seems really slow",
+				"emoji": true
+			}
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "mrkdwn",
+					"text": "*🖥 Desktop* _Mac_ (Safari)"
+				},
+				{
+					"type": "image",
+					"image_url": "https://pbs.twimg.com/profile_images/625633822235693056/lNGUneLX_400x400.jpg",
+					"alt_text": "cute cat"
+				},
+				{
+					"type": "mrkdwn",
+					"text": "*Matthew* _5 minutes ago_"
+				}
+			]
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*Steps to Reproduce*\n1. Do the good thing when you go to that page and then click it\n2. Do the bad thing by doing that other\n3. Do the other thing."
+			},
+			"accessory": {
+				"type": "image",
+				"image_url": "https://api.slack.com/img/blocks/bkb_template_images/notifications.png",
+				"alt_text": "calendar thumbnail"
+			}
+		},
+		{
+			"type": "section",
+			"fields": [
+				{
+					"type": "mrkdwn",
+					"text": "*Actual Behavior*\nThe thing exploded like a giant bomb and that was sad."
+				},
+				{
+					"type": "mrkdwn",
+					"text": "*Expected Behavior*\nThe thing should not explode that was bad and made me sad."
+				}
+			]
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "image",
+					"image_url": "https://pbs.twimg.com/profile_images/625633822235693056/lNGUneLX_400x400.jpg",
+					"alt_text": "cute cat"
+				},
+				{
+					"type": "image",
+					"image_url": "https://pbs.twimg.com/profile_images/625633822235693056/lNGUneLX_400x400.jpg",
+					"alt_text": "cute cat"
+				},
+				{
+					"type": "image",
+					"image_url": "https://pbs.twimg.com/profile_images/625633822235693056/lNGUneLX_400x400.jpg",
+					"alt_text": "cute cat"
+				},
+				{
+					"type": "mrkdwn",
+					"text": "*3* uploads"
+				},
+				{
+					"type": "mrkdwn",
+					"text": "<https://google.com/|🐞 Github Issue #2432 ↗️>"
+				}
+			]
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "*Provide More Details*"
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "Is this affecting a *Campaign Creator*?"
+			},
+			"accessory": {
+				"type": "button",
+				"text": {
+					"type": "plain_text",
+					"text": "Add CC",
+					"emoji": true
+				},
+				"value": "click_me_123",
+				"action_id": "button-action"
+			}
+		},
+		{
+			"type": "section",
+			"text": {
+				"type": "mrkdwn",
+				"text": "Relates to a *Specific Campaign*?"
+			},
+			"accessory": {
+				"type": "button",
+				"text": {
+					"type": "plain_text",
+					"text": "Add Campaign",
+					"emoji": true
+				},
+				"value": "click_me_123",
+				"action_id": "button-action"
+			}
+		},
+		{
+			"type": "divider"
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "mrkdwn",
+					"text": "ℹ️ *TIP:* new image replies will be uploaded to the bug report."
+				}
+			]
+		}
+	]
+}

@@ -5,9 +5,35 @@ export const INPUT_BUG_BASICS = {
 			"type": "header",
 			"text": {
 				"type": "plain_text",
-				"text": "Bug Details",
+				"text": "🪲 Bug Basics",
 				"emoji": true
 			}
+		},
+		{
+			"type": "input",
+			"element": {
+				"type": "plain_text_input",
+				"action_id": "input-title",
+				"placeholder": {
+					"type": "plain_text",
+					"text": "Example: computer turns homicidal after incorrect diagnostic"
+				},
+				"min_length": 10
+			},
+			"label": {
+				"type": "plain_text",
+				"text": "📰  Headline / Summary of Issue",
+				"emoji": true
+			}
+		},
+		{
+			"type": "context",
+			"elements": [
+				{
+					"type": "mrkdwn",
+					"text": "*Summarize* the issue in a few words."
+				}
+			]
 		},
 		{
 			"type": "divider"
@@ -23,7 +49,7 @@ export const INPUT_BUG_BASICS = {
 				},
 				"multiline": true,
 				"min_length": 50,
-				"focus_on_load": true
+				"focus_on_load": false
 			},
 			"label": {
 				"type": "plain_text",

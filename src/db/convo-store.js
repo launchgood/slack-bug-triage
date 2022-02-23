@@ -17,7 +17,7 @@ class ConvoStore {
       throw new Error('Could not generate ID for convo');
     }
     if (!userId) {
-      throw new Error('Undefined or null userId for convo');
+      throw new Error('No userId set on convo');
     }
     this.db[id] = convo;
     this.byUserId[convo.userId] = this.byUserId[convo.userId] || [];
@@ -46,8 +46,8 @@ class ConvoStore {
     return this.byViewId[viewId];
   }
 
-  findForEventPayload(event, payload) {
-    const id = BugReport.buildId(payload.user, event);
+  findForEvent(event) {
+    const id = BugReport.buildId(event);
     return this.db[id];
   }
 

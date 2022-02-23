@@ -1,16 +1,18 @@
-export default class BugReport {
-  constructor(userId, event) {
-    this.userId = userId;
-    this.parentEvent = event;
-    // this.lastActionId =
+import { DateTime } from 'luxon';
+import { Elements } from 'slack-block-builder';
 
-    this.body = event.text;
-    this.title = '';
+class BugReport {
+  constructor(event) {
+    this.parentEvent = event;
+    this.userId = this.parentEvent.user;
+    this.greetEvent = null;
+
+    this.userProfile = null;
 
     this.device = {
       browser: '',
-      type: '',
       os: '',
+      type: '',
     };
 
     this.basics = {
@@ -19,26 +21,131 @@ export default class BugReport {
       behaviorExpected: '',
     };
 
-    this.screenshots = [];
+    this.title = '';
+
+    this.files = [];
+
+    this.permalink = null;
 
     // https://docs.github.com/en/rest/reference/issues#get-an-issue
-    this.issue = null;
-    /* {
-      "id": 1,
-      "node_id": "MDU6SXNzdWUx",
-      "number": 1347,
-      "state": "open",
-      "title": "Found a bug",
-      "body": "I'm having a problem with this.",
-      "labels": []
-    } */
+    this.githubIssue = null;
   }
 
   get id() {
-    return BugReport.buildId(this.userId, this.parentEvent);
+    return BugReport.buildId(this.parentEvent);
+  }
+
+  toJSON() {
+    const {
+      id,
+      userId,
+      parentEvent,
+      device,
+      basics,
+      body,
+      title,
+      files,
+    } = this;
+    return {
+      id,
+      userId,
+      parentEvent,
+      device,
+      basics,
+      body,
+      title,
+      files,
+    };
+  }
+
+  get githubMarkdown() {
+    return `
+<!--
+BEGIN SLACK METADATA
+${JSON.stringify(this.toJSON(), null, 2)}
+END SLACK METADATA
+-->
+
+
+## 🪲  Bug Basics
+
+### 🗺  Steps to Reproduce
+
+${this.basics.steps}
+
+
+### 🪰  Actual Behavior
+
+_What they actually experienced:_
+
+${this.basics.behaviorActual}
+
+
+### 🎯  Expected Behavior
+
+_What they expected to happen:_
+
+${this.basics.behaviorExpected}
+
+
+## 📸 Screenshots
+
+${this.filesMarkdown}
+
+
+## About
+
+[Reported on Slack by ${this.userProfile.real_name}](${this.permalink})
+
+- Device: ${this.deviceTypeIcon} ${this.device.type};
+- OS: ${this.osIcon} ${this.device.os}
+- Browser: ${this.device.browser}
+
+`;
+  }
+
+  get deviceTypeIcon() {
+    return this.device.browser === 'desktop' ? '🖥' : '📱';
+  }
+
+  get osIcon() {
+    switch (this.device.os) {
+      case 'macos':
+        return '🍎';
+      case 'windows':
+        return '🪟';
+      default:
+        return '🐧';
+    }
+  }
+
+  get filesMarkdown() {
+    // TODO: this is not working for some reason
+    // eslint-disable-next-line max-len
+    // return this.files.map((file) => `![Slack File ID ${file.id}](${file.imageUrl})`).join('\n\n');
+    return this.files.map((file) => `- ${file.imageUrl}`).join('\n');
+  }
+
+  get filesAsSlackElements() {
+    return this.files.map((file) => {
+      const {
+        altText,
+        imageUrl,
+      } = file;
+      return Elements.Img({
+        altText,
+        imageUrl,
+      });
+    });
+  }
+
+  get relativeTime() {
+    return DateTime.fromSeconds(parseInt(this.parentEvent.ts, 10)).toRelative();
   }
 }
 
-BugReport.buildId = function buildId(userId, parentEvent) {
-  return `${userId}-${parentEvent.ts}`;
+BugReport.buildId = function buildId(parentEvent) {
+  return `${parentEvent.parent_ts || parentEvent.ts}`;
 };
+
+export default BugReport;
