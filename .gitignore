@@ -1,2 +1,41 @@
 
+# ignore npm deps
+node_modules/
+# ignore shared FS for docker
+nucleus_node_modules/
+
+# generated output
+dist/
+logs/
+log/
+reports
+code-quality-reports
+report.html
+report.json
+config/keys/contracts.json
+config/keys/wallets.json
+temp
+
+# ???
+radar.conf
+
+# Mac & IDEO stuff
+.DS_Store
+.vscode
+.idea
+
+# patch files
+*.diff
+*.patch
+
+# these are secret; don't add to git!
 .env
+config/keys/.*
+.secrets
+
+# these are safe to add to git
+!config/keys/.development
+!config/keys/.development*
+
+# sql dumps
+backups
