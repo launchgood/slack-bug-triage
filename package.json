@@ -1,0 +1,44 @@
+{
+  "name": "slack-bug-triage",
+  "version": "0.1.0",
+  "description": "Automatically triage bugs in a Slack channel.",
+  "main": "src/app.js",
+  "type": "module",
+  "scripts": {
+    "lint": "eslint src/**/*.js",
+    "dev": "eslint && npm run start",
+    "start": "node --experimental-specifier-resolution=node src/app.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/launchgood/slack-bug-triage.git"
+  },
+  "keywords": [
+    "Slack",
+    "Bot",
+    "Github",
+    "issues",
+    "triage",
+    "bugs",
+    "bug",
+    "report"
+  ],
+  "author": "Matthew J. Martin <matthew.mar10@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/launchgood/slack-bug-triage/issues"
+  },
+  "homepage": "https://github.com/launchgood/slack-bug-triage#readme",
+  "dependencies": {
+    "@ladjs/env": "^3.0.0",
+    "@slack/bolt": "^3.9.0",
+    "luxon": "^2.3.0",
+    "object-mapper": "^6.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.9.0",
+    "eslint-config-airbnb-base": "^15.0.0",
+    "eslint-plugin-import": "^2.25.4"
+  }
+}
