@@ -34,7 +34,8 @@ const app = new App({
   logLevel: LogLevel.INFO,
   // logLevel: LogLevel.DEBUG,
   signingSecret: env.SLACK_SIGNING_SECRET,
-  socketMode: true,
+  // use webhook (not socket) when deployed to heroku
+  socketMode: env.NODE_ENV !== 'PRODUCTION',
   appToken: env.SLACK_APP_TOKEN,
 });
 
