@@ -83,10 +83,15 @@ app.view({ type: 'view_submission' }, action.viewSubmit({
     // server.listen(port);
     // console.log(`⚡️ Bolt app is running! Fake server on ${port}`);
     // eslint-disable-next-line no-console
-    console.log('⚡️ Bolt app is running!');
+    app.logger.info('⚡️ Bolt app is running!');
+
+    // keep nodejs alive; note if we add persistence this isn't needed
+    setInterval(() => {
+      app.logger.info('👂 🐞 Waiting for Slack messages...');
+    }, 5 * 60 * 1000);
   } else {
     await app.start(port);
     // eslint-disable-next-line no-console
-    console.log(`⚡️ Bolt app is running! port: ${port}`);
+    app.logger.info(`⚡️ Bolt app is running! port: ${port}`);
   }
 })();
