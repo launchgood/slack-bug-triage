@@ -1,7 +1,7 @@
 import bolt from '@slack/bolt';
 import dotEnv from '@ladjs/env';
 import github from '@actions/github';
-import http from 'http';
+// import http from 'http';
 import AWS from 'aws-sdk';
 import {
   action,
@@ -71,27 +71,30 @@ app.view({ type: 'view_submission' }, action.viewSubmit({
 
 (async () => {
   const port = process.env.PORT || 3000;
+  await app.start(port);
+  // eslint-disable-next-line no-console
+  app.logger.info(`⚡️ Bolt app is running! port: ${port}`);
 
-  if (env.NODE_ENV === 'production') {
-    // const server = http.createServer((req, res) => {
-    //   // set response header
-    //   res.writeHead(200, { 'Content-Type': 'text/html' });
-    //   // set response content
-    //   res.write('<html><body><h1>It works</h1></body></html>');
-    //   res.end();
-    // });
-    // server.listen(port);
-    // console.log(`⚡️ Bolt app is running! Fake server on ${port}`);
-    // eslint-disable-next-line no-console
-    app.logger.info('⚡️ Bolt app is running!');
+  // if (env.NODE_ENV === 'production') {
+  //   // const server = http.createServer((req, res) => {
+  //   //   // set response header
+  //   //   res.writeHead(200, { 'Content-Type': 'text/html' });
+  //   //   // set response content
+  //   //   res.write('<html><body><h1>It works</h1></body></html>');
+  //   //   res.end();
+  //   // });
+  //   // server.listen(port);
+  //   // console.log(`⚡️ Bolt app is running! Fake server on ${port}`);
+  //   // eslint-disable-next-line no-console
+  //   app.logger.info('⚡️ Bolt app is running!');
 
-    // keep nodejs alive; note if we add persistence this isn't needed
-    setInterval(() => {
-      app.logger.info('👂 🐞 Waiting for Slack messages...');
-    }, 5 * 60 * 1000);
-  } else {
-    await app.start(port);
-    // eslint-disable-next-line no-console
-    app.logger.info(`⚡️ Bolt app is running! port: ${port}`);
-  }
+  //   // keep nodejs alive; note if we add persistence this isn't needed
+  //   setInterval(() => {
+  //     app.logger.info('👂 🐞 Waiting for Slack messages...');
+  //   }, 5 * 60 * 1000);
+  // } else {
+  //   await app.start(port);
+  //   // eslint-disable-next-line no-console
+  //   app.logger.info(`⚡️ Bolt app is running! port: ${port}`);
+  // }
 })();
