@@ -27,7 +27,7 @@ export default function uploadFilesToAws(imports) {
     logger.info('Handling message...');
 
     const { files } = payload;
-    const { conversation } = context;
+    const { bugReport } = context;
 
     if (!files) {
       logger.info('No files to process...');
@@ -36,7 +36,7 @@ export default function uploadFilesToAws(imports) {
     }
 
     try {
-      logger.info(`Processing ${files.length} files...`);
+      logger.info(`Processing bug report ${bugReport.id} ${files.length} files...`);
       const uploadedFiles = await (Promise.all(
         files.map(async (file) => {
           logger.debug(`  > File: ${file.id}`, file);
@@ -47,6 +47,7 @@ export default function uploadFilesToAws(imports) {
             },
             responseType: 'arraybuffer',
           });
+          logger.debug()
 
           const filename = `slack-upload-${file.id}.${file.filetype}`;
           const uploadParams = {
@@ -87,30 +88,31 @@ export default function uploadFilesToAws(imports) {
         }),
       ));
 
-      const assignToConversation = async (convo) => {
+      const assignToConversation = async (report) => {
         const {
           parentEvent,
           greetEvent,
-        } = convo;
+        } = report;
         // eslint-disable-next-line no-param-reassign
-        convo.files = convo.files.concat(uploadedFiles);
-        if (convo.githubIssue) {
+        report.files = report.files.concat(uploadedFiles);
+        if (report.githubIssue) {
           const {
             githubIssue: {
               number,
             },
-          } = convo;
-          logger.info(`Conversation ${conversation.id} updating existing Github issue #${number}...`);
-          await octokit.rest.issues.update({
+          } = report;
+          logger.info(`Bug report ${report.id} updating existing Github issue #${number}...`);
+          const githubRes = await octokit.rest.issues.update({
             owner,
             repo,
             issue_number: number,
-            body: convo.githubMarkdown,
+            body: report.githubMarkdown,
           });
-          logger.info(`Conversation ${conversation.id} created Github issue #${number} OK`);
+          logger.info(`Bug report ${report.id} updated Github issue #${number} OK`);
+          logger.debug(`Bug report ${report.id} updated Github issue #${number} is:`, githubRes);
 
-          logger.info(`Conversation ${conversation.id} updating existing message...`);
-          const msg = BUG_REPORT_WITH_ACTIONS(convo)
+          logger.info(`Bug report ${report.id} updating existing message...`);
+          const msg = BUG_REPORT_WITH_ACTIONS(report)
             .channel(parentEvent.channel)
             .threadTs(parentEvent.ts)
             .buildToObject();
@@ -119,12 +121,14 @@ export default function uploadFilesToAws(imports) {
             channel: greetEvent.channel,
             ts: greetEvent.ts,
           });
-          conversation.greetEvent = newGreetEvent;
-          convoStore.save(conversation);
-          logger.info(`Conversation ${conversation.id} updated existing OK`);
+          // eslint-disable-next-line no-param-reassign
+          report.greetEvent = newGreetEvent;
+          convoStore.save(report);
+          logger.info(`Bug report ${report.id} updated existing message OK`);
+          logger.debug(`Bug report ${report.id} updated existing message is:`, report);
         } else {
-          logger.info(`Conversation ${convo.id} updating greeting to include files...`);
-          const msg = INITIAL_MESSAGE(convo)
+          logger.info(`Bug report ${report.id} updating greeting to include files...`);
+          const msg = INITIAL_MESSAGE(report)
             .channel(parentEvent.channel)
             .threadTs(parentEvent.ts)
             .ts(greetEvent.ts)
@@ -135,22 +139,23 @@ export default function uploadFilesToAws(imports) {
             ts: greetEvent.ts,
           });
           // eslint-disable-next-line no-param-reassign
-          convo.greetEvent = await client.chat.postMessage(msg);
-          logger.info(`Conversation ${convo.id} updating greeting to include files OK`);
+          report.greetEvent = await client.chat.postMessage(msg);
+          logger.info(`Bug report ${report.id} updating greeting to include files OK`);
         }
-        convoStore.save(convo);
+        convoStore.save(report);
       };
 
-      if (conversation && conversation.files) {
-        await assignToConversation(conversation);
+      if (bugReport && bugReport.files) {
+        await assignToConversation(bugReport);
       } else {
-        logger.info('Looking up convo for event...');
+        logger.info('Looking up bug report for event...');
         const convo = convoStore.findForEvent(event);
         if (convo) {
-          logger.info(`Conversation ${convo.id} found`);
+          logger.info(`Bug report ${convo.id} found`);
+          logger.debug(`Bug report ${convo.id} is:`, convo);
           await assignToConversation(convo);
         } else {
-          logger.error('Could not find convo for event:', event);
+          logger.error('Could not find bug report for event:', event);
         }
       }
 

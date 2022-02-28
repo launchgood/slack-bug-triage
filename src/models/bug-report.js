@@ -145,7 +145,7 @@ ${this.filesMarkdown}
 }
 
 BugReport.buildId = function buildId(parentEvent) {
-  return `${parentEvent.parent_ts || parentEvent.ts}`;
+  return `${parentEvent.thread_ts || parentEvent.ts}`;
 };
 
 export default BugReport;

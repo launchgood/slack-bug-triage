@@ -14,7 +14,7 @@ export default function (imports) {
     const {
       ack,
       client,
-      context: { conversation },
+      context: { bugReport },
       view: {
         state: {
           values,
@@ -36,67 +36,67 @@ export default function (imports) {
           logger.info(`action ${actionId}: `, action);
           const targetPropertyId = actionIdToTargetProperty[actionId];
           const { value } = action;
-          objectMapper.setKeyValue(conversation, targetPropertyId, value);
+          objectMapper.setKeyValue(bugReport, targetPropertyId, value);
         });
       });
 
       await ack();
 
-      logger.info(`Conversation ${conversation.id} creating permalink...`);
+      logger.info(`Conversation ${bugReport.id} creating permalink...`);
       const {
         parentEvent: {
           channel,
           ts,
         }
-      } = conversation;
+      } = bugReport;
       const {
         permalink,
       } = await client.chat.getPermalink({
         channel,
         message_ts: ts,
       });
-      conversation.permalink = permalink;
-      convoStore.save(conversation);
-      logger.info(`Conversation ${conversation.id} permalink created OK`);
+      bugReport.permalink = permalink;
+      convoStore.save(bugReport);
+      logger.info(`Conversation ${bugReport.id} permalink created OK`);
 
-      if (!conversation.userProfile) {
-        logger.info(`Conversation ${conversation.id} fetching user...`);
-        const { user } = conversation.parentEvent;
+      if (!bugReport.userProfile) {
+        logger.info(`Conversation ${bugReport.id} fetching user...`);
+        const { user } = bugReport.parentEvent;
         const res = await client.users.profile.get({
           user,
         });
-        conversation.userProfile = res.profile;
-        logger.info(`Conversation ${conversation.id} fetched user OK: ${conversation.userProfile.real_name}`);
+        bugReport.userProfile = res.profile;
+        logger.info(`Conversation ${bugReport.id} fetched user OK: ${bugReport.userProfile.real_name}`);
       }
 
-      logger.info(`Conversation ${conversation.id} creating new Github issue...`);
+      logger.info(`Conversation ${bugReport.id} creating new Github issue...`);
       const {
         data,
       } = await octokit.rest.issues.create({
         owner,
         repo,
-        title: conversation.title,
-        body: conversation.githubMarkdown,
+        title: bugReport.title,
+        body: bugReport.githubMarkdown,
         labels: ['Bug', 'Slack'],
       });
-      logger.info(`Conversation ${conversation.id} created Github issue #${data.number}`, data);
-      conversation.githubIssue = data;
-      convoStore.save(conversation);
+      logger.info(`Conversation ${bugReport.id} created Github issue #${data.number}`, data);
+      bugReport.githubIssue = data;
+      convoStore.save(bugReport);
 
-      logger.info(`Conversation ${conversation.id} updating message...`, conversation);
-      const msg = BUG_REPORT_WITH_ACTIONS(conversation)
-        .channel(conversation.parentEvent.channel)
-        .threadTs(conversation.parentEvent.ts)
+      logger.info(`Conversation ${bugReport.id} updating message...`, bugReport);
+      const msg = BUG_REPORT_WITH_ACTIONS(bugReport)
+        .channel(bugReport.parentEvent.channel)
+        .threadTs(bugReport.parentEvent.ts)
         .buildToObject();
       const newGreetEvent = await client.chat.postMessage(msg);
       await client.chat.delete({
-        channel: conversation.greetEvent.channel,
-        ts: conversation.greetEvent.ts,
+        channel: bugReport.greetEvent.channel,
+        ts: bugReport.greetEvent.ts,
       });
-      conversation.greetEvent = newGreetEvent;
-      convoStore.save(conversation);
+      bugReport.greetEvent = newGreetEvent;
+      convoStore.save(bugReport);
 
-      logger.info(`Conversation ${conversation.id} updated message OK:`, conversation.greetEvent);
+      logger.info(`Conversation ${bugReport.id} updated message OK:`, bugReport.greetEvent);
     } catch (err) {
       logger.error(err);
       logger.error(err.stack);

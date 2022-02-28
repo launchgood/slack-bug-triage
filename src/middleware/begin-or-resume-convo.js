@@ -13,44 +13,7 @@ export default async function beginOrResumeConvo(req) {
   } = req;
 
   try {
-    const { conversation } = context;
-
-    // conversation exists, do nothing
-    if (conversation) {
-      const convo = convoStore.get(conversation.id);
-      logger.info(`Existing conversation: ${convo.id}`);
-      await next();
-      return;
-    }
-
-    // this is a message within chat
-    if (event) {
-      logger.info('Looking up conversation from event...');
-      const convo = convoStore.findForEvent(event);
-      if (convo) {
-        logger.info(`Existing conversation: ${convo.id}`);
-        await next();
-        return;
-      }
-
-      logger.info('Starting new conversation...');
-      const newConvo = new BugReport(event);
-      convoStore.save(newConvo);
-      logger.info(`New conversation: ${newConvo.id}`);
-
-      logger.info(`Conversation ${newConvo.id} fetching user...`);
-      const { user } = newConvo.parentEvent;
-      const res = await client.users.profile.get({
-        user,
-      });
-      newConvo.userProfile = res.profile;
-      logger.info(`Conversation ${newConvo.id} fetched user OK: ${newConvo.userProfile.real_name}`);
-      convoStore.save(newConvo);
-
-      await context.updateConversation(newConvo);
-      await next();
-      return;
-    }
+    const { bugReport } = context;
 
     const meta = {
       body,
@@ -58,30 +21,86 @@ export default async function beginOrResumeConvo(req) {
       event,
       payload,
     };
+    logger.debug('Looking up bug report:', meta);
 
-    logger.info('Looking up convo...');
+    if (bugReport) {
+      const report = convoStore.get(bugReport.id);
+      logger.info(`Bug report ${report.id} already exists on context...`);
+      await next();
+      return;
+    }
+
+    // this is a message within chat
+    if (event) {
+      logger.info('Looking up bug report from event...');
+      const report = convoStore.findForEvent(event);
+      if (report) {
+        context.bugReport = report;
+        logger.info(`Bug report ${report.id} resuming from event...`);
+        logger.debug(`Existing bug report ${report.id} is:`, report);
+        await next();
+        return;
+      }
+
+      logger.info('Starting new bug report...');
+      const newBugReport = new BugReport(event);
+      convoStore.save(newBugReport);
+      logger.debug(`New bug report: ${newBugReport.id}`);
+
+      logger.info(`Bug report ${newBugReport.id} fetching user...`);
+      const { user } = newBugReport.parentEvent;
+      const res = await client.users.profile.get({
+        user,
+      });
+      newBugReport.userProfile = res.profile;
+      convoStore.save(newBugReport);
+      logger.debug(`Bug report ${newBugReport.id} fetched user OK:`, newBugReport.userProfile);
+
+      await next();
+      return;
+    }
 
     const { view } = body;
     if (view) {
+      logger.info('Looking up bug report from view...');
       const { id, type } = view;
       if (type === 'modal') {
-        logger.info(`Looking up convo for view ${id} (type: ${type}) to hand over...`);
-        const convo = convoStore.findByViewId(id);
-        if (convo) {
-          logger.info(`Converation ${convo.id} resuming...`);
-          context.conversation = convo;
+        logger.info(`Looking up bug report for view ${id} (type: ${type}) to hand over...`);
+        const bugReportFromView = convoStore.findByViewId(id);
+        if (bugReportFromView) {
+          logger.info(`Bug report ${bugReportFromView.id} resuming...`);
+          context.bugReport = bugReportFromView;
+          logger.debug(`Bug report ${bugReportFromView.id} is:`, bugReportFromView);
           await next();
           return;
         }
-        logger.error(`Unexpected view ${id}`);
+        logger.error(`Unexpected view ID: ${id}`);
       } else {
         logger.warn(`Unexpected convo type: ${type}`);
       }
     }
 
-    logger.warn('Could not resume convo:', meta);
+    // user clicked an action
+    if (body.type === 'block_actions') {
+      logger.info('Looking up bug report from block action regex...');
+      const report = convoStore.findForActionId(payload.action_id);
+      if (report) {
+        context.bugReport = report;
+        logger.info(`Bug report ${report.id} triggered block action...`);
+        logger.debug(`Existing bug report ${report.id} is:`, report);
+        await next();
+        return;
+      }
+    }
+
+    logger.warn('Could not find existing bug report:', meta);
     await next();
   } catch (err) {
-    logger.error('Error while begin or resume convo:', err);
+    logger.error('Error while begin or resume bug report:', {
+      body,
+      context,
+      event,
+      payload,
+    }, err);
   }
 }

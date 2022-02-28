@@ -13,19 +13,20 @@ export default async function greet(req) {
   try {
     const { channel, ts } = event;
 
-    const { conversation } = context;
-    if (!conversation) {
-      const convo = new BugReport(event);
-      convoStore.save(convo);
-      context.updateConversation(convo);
+    const { bugReport } = context;
+    if (!bugReport) {
+      const newBugReport = new BugReport(event);
+      convoStore.save(newBugReport);
 
-      logger.info(`Sending greeting for new conversation ${convo.id}`);
-      const msg = INITIAL_MESSAGE(convo)
+      logger.info(`New bug report ${newBugReport.id} sending greeting...`);
+      const msg = INITIAL_MESSAGE(newBugReport)
         .channel(channel)
         .threadTs(ts)
         .buildToObject();
-      convo.greetEvent = await client.chat.postMessage(msg);
-      convoStore.save(convo);
+      newBugReport.greetEvent = await client.chat.postMessage(msg);
+      logger.info(`New bug report ${newBugReport.id} sent greeting OK`);
+      logger.debug(`New bug report ${newBugReport.id} greet event is:`, newBugReport.greetEvent);
+      convoStore.save(newBugReport);
     }
 
     await next();

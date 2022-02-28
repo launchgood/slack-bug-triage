@@ -8,7 +8,7 @@ import convoStore from '../../db/convo-store';
 export default async function selectDeviceType(req) {
   const {
     ack,
-    context: { conversation },
+    context: { bugReport },
     client,
     body: {
       // eslint-disable-next-line camelcase
@@ -27,12 +27,13 @@ export default async function selectDeviceType(req) {
     },
   } = req;
 
+  console.log('CONTEXT::::::::::', req.context);
   await ack();
 
   try {
-    logger.info(`Convo ${conversation.id} select-device-type ${value}`);
-    conversation.device.type = value;
-    convoStore.save(conversation);
+    logger.info(`Bug report ${bugReport.id} select-device-type ${value}`);
+    bugReport.device.type = value;
+    convoStore.save(bugReport);
 
     await ack();
 
@@ -52,7 +53,7 @@ export default async function selectDeviceType(req) {
       },
     });
 
-    logger.info(`Convo ${conversation.id} view ${id} updated`);
+    logger.info(`Bug report ${bugReport.id} view ${id} updated`);
   } catch (err) {
     logger.error(err);
   }

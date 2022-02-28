@@ -16,9 +16,9 @@ export default async function launchTriageModal({
 }) {
   try {
     await ack();
-    const { conversation } = context;
+    const { bugReport } = context;
 
-    logger.info(`Launching modal for conversation ${conversation.id}`);
+    logger.info(`Bug report ${bugReport.id} launching modal...`);
     const view = {
       ...VIEW_MODAL_BUG_TRIAGE.view,
       blocks: SELECT_DEVICE_TYPE.blocks,
@@ -32,9 +32,8 @@ export default async function launchTriageModal({
       trigger_id,
       view,
     });
-
-    logger.info(`Associating view ${id} with conversation ${conversation.id}`);
-    convoStore.associateView(id, conversation);
+    logger.info(`Bug report ${bugReport.id} launched modal view ${id}.`);
+    convoStore.associateView(id, bugReport);
   } catch (err) {
     logger.error(err);
   }

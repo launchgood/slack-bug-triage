@@ -11,7 +11,7 @@ export function INITIAL_MESSAGE(bugReport) {
   } = bugReport;
   const cta = () => Blocks.Actions().elements([
     Elements.Button({
-      actionId: 'launch-triage-modal',
+      actionId: `launch-triage-modal.${bugReport.id}`,
       text: '👉 Add Details 👈',
     }).primary(),
   ]);

@@ -32,8 +32,8 @@ const octokit = new github.getOctokit(env.GITHUB_TOKEN);
 const { App, LogLevel } = bolt;
 const app = new App({
   token: env.SLACK_BOT_TOKEN,
-  logLevel: LogLevel.INFO,
-  // logLevel: LogLevel.DEBUG,
+  // logLevel: LogLevel.INFO,
+  logLevel: LogLevel.DEBUG,
   signingSecret: env.SLACK_SIGNING_SECRET,
   // use webhook (not socket) when deployed to heroku
   socketMode: env.NODE_ENV !== 'PRODUCTION',
@@ -58,7 +58,7 @@ app.message(noBotMessages, noReplies, greet, uploadFiles, noop);
 // replies with files get added to bug report
 app.message(noBotMessages, repliesOnly, uploadFiles, noop);
 
-app.action('launch-triage-modal', action.launchTriageModal);
+app.action(/^launch-triage-modal/, action.launchTriageModal);
 app.action('select-device-type', action.selectDeviceType);
 app.action('select-os', action.selectOs);
 app.action('select-browser', action.selectBrowser);

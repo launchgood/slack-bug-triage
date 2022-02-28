@@ -10,11 +10,11 @@ function clone(obj) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function setInitialValues(originalBlocks, conversation) {
+function setInitialValues(originalBlocks, bugReport) {
   const blocks = clone(originalBlocks);
 
   // this method didn't work for some reason, so just hard-coded
-  // return objectMapper.merge(conversation, blocks, {
+  // return objectMapper.merge(bugReport, blocks, {
   //   'parentEvent.text': '[1].element.initial_value',
   //   title: '[1].element.initial_value',
   //   'basics.steps': '[4].element.initial_value',
@@ -22,10 +22,10 @@ function setInitialValues(originalBlocks, conversation) {
   //   'basics.behaviorExpected': '[10].element.initial_value',
   // });
 
-  // blocks[1].element.initial_value = conversation.parentEvent.text;
+  // blocks[1].element.initial_value = bugReport.parentEvent.text;
 
   // use initial message as steps to reproduce
-  blocks[4].element.initial_value = conversation.parentEvent.text;
+  blocks[4].element.initial_value = bugReport.parentEvent.text;
 
   return blocks;
 }
@@ -33,7 +33,7 @@ function setInitialValues(originalBlocks, conversation) {
 export default async function selectDeviceType(req) {
   const {
     ack,
-    context: { conversation },
+    context: { bugReport },
     client,
     body: {
       // eslint-disable-next-line camelcase
@@ -55,13 +55,13 @@ export default async function selectDeviceType(req) {
   await ack();
 
   try {
-    logger.info(`Convo ${conversation.id} select-browser ${value}`);
-    conversation.device.browser = value;
-    convoStore.save(conversation);
+    logger.info(`Convo ${bugReport.id} select-browser ${value}`);
+    bugReport.device.browser = value;
+    convoStore.save(bugReport);
 
     await ack();
 
-    const blocks = setInitialValues(INPUT_BUG_BASICS.blocks, conversation);
+    const blocks = setInitialValues(INPUT_BUG_BASICS.blocks, bugReport);
 
     await await client.views.update({
       // eslint-disable-next-line camelcase
@@ -76,7 +76,7 @@ export default async function selectDeviceType(req) {
       },
     });
 
-    logger.info(`Convo ${conversation.id} view ${id} updated`);
+    logger.info(`Convo ${bugReport.id} view ${id} updated`);
   } catch (err) {
     logger.error(err);
   }
