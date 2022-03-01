@@ -3,7 +3,7 @@ import {
   VIEW_SUBMIT_BUTTON,
   INPUT_BUG_BASICS,
 } from '../../dialog/index';
-import convoStore from '../../db/convo-store';
+import db from '../../db/index';
 
 function clone(obj) {
   // quick hacky way to make sure we don't modify the base template
@@ -57,7 +57,7 @@ export default async function selectDeviceType(req) {
   try {
     logger.info(`Convo ${bugReport.id} select-browser ${value}`);
     bugReport.device.browser = value;
-    convoStore.save(bugReport);
+    await db().save(bugReport);
 
     await ack();
 

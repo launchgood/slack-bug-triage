@@ -2,7 +2,7 @@ import {
   VIEW_MODAL_BUG_TRIAGE,
   SELECT_BROWSER,
 } from '../../dialog/index';
-import convoStore from '../../db/convo-store';
+import db from '../../db/index';
 
 export default async function selectDeviceType(req) {
   const {
@@ -31,7 +31,7 @@ export default async function selectDeviceType(req) {
   try {
     logger.info(`Bug report ${bugReport.id} select-os ${value}`);
     bugReport.device.os = value;
-    convoStore.save(bugReport);
+    await db().save(bugReport);
 
     await ack();
 

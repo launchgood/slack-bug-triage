@@ -1,4 +1,4 @@
-import convoStore from '../../db/convo-store';
+import db from '../../db/index';
 import {
   VIEW_MODAL_BUG_TRIAGE,
   SELECT_DEVICE_TYPE,
@@ -33,7 +33,7 @@ export default async function launchTriageModal({
       view,
     });
     logger.info(`Bug report ${bugReport.id} launched modal view ${id}.`);
-    convoStore.associateView(id, bugReport);
+    await db().associateView(id, bugReport);
   } catch (err) {
     logger.error(err);
   }

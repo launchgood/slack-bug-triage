@@ -1,5 +1,5 @@
 import BugReport from '../models/bug-report';
-import convoStore from '../db/convo-store';
+import db from '../db/index';
 
 export default async function beginOrResumeConvo(req) {
   const {
@@ -24,7 +24,7 @@ export default async function beginOrResumeConvo(req) {
     logger.debug('Looking up bug report:', meta);
 
     if (bugReport) {
-      const report = convoStore.get(bugReport.id);
+      const report = await db().get(bugReport.id);
       logger.info(`Bug report ${report.id} already exists on context...`);
       await next();
       return;
@@ -33,7 +33,7 @@ export default async function beginOrResumeConvo(req) {
     // this is a message within chat
     if (event) {
       logger.info('Looking up bug report from event...');
-      const report = convoStore.findForEvent(event);
+      const report = await db().findForEvent(event);
       if (report) {
         context.bugReport = report;
         logger.info(`Bug report ${report.id} resuming from event...`);
@@ -42,9 +42,18 @@ export default async function beginOrResumeConvo(req) {
         return;
       }
 
+      // eslint-disable-next-line camelcase
+      const { type, channel_type } = event;
+      // eslint-disable-next-line camelcase
+      if (type !== 'message' || channel_type !== 'channel') {
+        logger.info('Ignoring non channel message:');
+        logger.debug('Ingoring event:', meta);
+        await next();
+        return;
+      }
       logger.info('Starting new bug report...');
       const newBugReport = new BugReport(event);
-      convoStore.save(newBugReport);
+      await db().save(newBugReport);
       logger.debug(`New bug report: ${newBugReport.id}`);
 
       logger.info(`Bug report ${newBugReport.id} fetching user...`);
@@ -53,7 +62,7 @@ export default async function beginOrResumeConvo(req) {
         user,
       });
       newBugReport.userProfile = res.profile;
-      convoStore.save(newBugReport);
+      await db().save(newBugReport);
       logger.debug(`Bug report ${newBugReport.id} fetched user OK:`, newBugReport.userProfile);
 
       await next();
@@ -66,7 +75,7 @@ export default async function beginOrResumeConvo(req) {
       const { id, type } = view;
       if (type === 'modal') {
         logger.info(`Looking up bug report for view ${id} (type: ${type}) to hand over...`);
-        const bugReportFromView = convoStore.findByViewId(id);
+        const bugReportFromView = await db().findByViewId(id);
         if (bugReportFromView) {
           logger.info(`Bug report ${bugReportFromView.id} resuming...`);
           context.bugReport = bugReportFromView;
@@ -81,9 +90,9 @@ export default async function beginOrResumeConvo(req) {
     }
 
     // user clicked an action
-    if (body.type === 'block_actions') {
+    if (body.type === 'block_actions' && payload.action_id.includes('.')) {
       logger.info('Looking up bug report from block action regex...');
-      const report = convoStore.findForActionId(payload.action_id);
+      const report = await db().findForActionId(payload.action_id);
       if (report) {
         context.bugReport = report;
         logger.info(`Bug report ${report.id} triggered block action...`);

@@ -3,7 +3,7 @@ import {
   BUG_REPORT_WITH_ACTIONS,
   INITIAL_MESSAGE
 } from '../dialog/index';
-import convoStore from '../db/convo-store';
+import db from '../db/index';
 
 export default function uploadFilesToAws(imports) {
   const {
@@ -123,7 +123,7 @@ export default function uploadFilesToAws(imports) {
           });
           // eslint-disable-next-line no-param-reassign
           report.greetEvent = newGreetEvent;
-          convoStore.save(report);
+          await db().save(report);
           logger.info(`Bug report ${report.id} updated existing message OK`);
           logger.debug(`Bug report ${report.id} updated existing message is:`, report);
         } else {
@@ -142,14 +142,14 @@ export default function uploadFilesToAws(imports) {
           report.greetEvent = await client.chat.postMessage(msg);
           logger.info(`Bug report ${report.id} updating greeting to include files OK`);
         }
-        convoStore.save(report);
+        await db().save(report);
       };
 
       if (bugReport && bugReport.files) {
         await assignToConversation(bugReport);
       } else {
         logger.info('Looking up bug report for event...');
-        const convo = convoStore.findForEvent(event);
+        const convo = await db().findForEvent(event);
         if (convo) {
           logger.info(`Bug report ${convo.id} found`);
           logger.debug(`Bug report ${convo.id} is:`, convo);

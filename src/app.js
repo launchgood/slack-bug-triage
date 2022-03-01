@@ -13,6 +13,7 @@ import {
   uploadFilesToAws,
   repliesOnly,
 } from './middleware/index';
+import { initDb } from './db/index';
 
 const env = dotEnv();
 
@@ -39,6 +40,8 @@ const app = new App({
   socketMode: env.NODE_ENV !== 'PRODUCTION',
   appToken: env.SLACK_APP_TOKEN,
 });
+
+initDb(env.REDIS_URL, app.logger);
 
 // start convo for each message, if one does not already exist
 app.use(beginOrResumeConvo);

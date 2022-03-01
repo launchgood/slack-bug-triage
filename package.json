@@ -38,6 +38,7 @@
     "aws-sdk": "^2.1080.0",
     "axios": "^0.26.0",
     "change-case": "^4.1.2",
+    "ioredis": "^4.28.5",
     "luxon": "^2.3.0",
     "object-mapper": "^6.2.0",
     "slack-block-builder": "^2.5.0"

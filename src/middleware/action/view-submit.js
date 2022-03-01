@@ -1,6 +1,6 @@
 import objectMapper from 'object-mapper';
 import { BUG_REPORT_WITH_ACTIONS } from '../../dialog/index';
-import convoStore from '../../db/convo-store';
+import db from '../../db/index';
 
 // eslint-disable-next-line func-names
 export default function (imports) {
@@ -56,7 +56,7 @@ export default function (imports) {
         message_ts: ts,
       });
       bugReport.permalink = permalink;
-      convoStore.save(bugReport);
+      await db().save(bugReport);
       logger.info(`Conversation ${bugReport.id} permalink created OK`);
 
       if (!bugReport.userProfile) {
@@ -81,7 +81,7 @@ export default function (imports) {
       });
       logger.info(`Conversation ${bugReport.id} created Github issue #${data.number}`, data);
       bugReport.githubIssue = data;
-      convoStore.save(bugReport);
+      await db().save(bugReport);
 
       logger.info(`Conversation ${bugReport.id} updating message...`, bugReport);
       const msg = BUG_REPORT_WITH_ACTIONS(bugReport)
@@ -94,7 +94,7 @@ export default function (imports) {
         ts: bugReport.greetEvent.ts,
       });
       bugReport.greetEvent = newGreetEvent;
-      convoStore.save(bugReport);
+      await db().save(bugReport);
 
       logger.info(`Conversation ${bugReport.id} updated message OK:`, bugReport.greetEvent);
     } catch (err) {

@@ -1,6 +1,6 @@
 import { INITIAL_MESSAGE } from '../dialog/index';
 import BugReport from '../models/bug-report';
-import convoStore from '../db/convo-store';
+import db from '../db/index';
 
 export default async function greet(req) {
   const {
@@ -16,7 +16,7 @@ export default async function greet(req) {
     const { bugReport } = context;
     if (!bugReport) {
       const newBugReport = new BugReport(event);
-      convoStore.save(newBugReport);
+      await db().save(newBugReport);
 
       logger.info(`New bug report ${newBugReport.id} sending greeting...`);
       const msg = INITIAL_MESSAGE(newBugReport)
@@ -26,7 +26,7 @@ export default async function greet(req) {
       newBugReport.greetEvent = await client.chat.postMessage(msg);
       logger.info(`New bug report ${newBugReport.id} sent greeting OK`);
       logger.debug(`New bug report ${newBugReport.id} greet event is:`, newBugReport.greetEvent);
-      convoStore.save(newBugReport);
+      await db().save(newBugReport);
     }
 
     await next();

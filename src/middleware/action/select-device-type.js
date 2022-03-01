@@ -3,7 +3,7 @@ import {
   SELECT_OS_MOBILE,
   SELECT_OS_DESKTOP,
 } from '../../dialog/index';
-import convoStore from '../../db/convo-store';
+import db from '../../db/index';
 
 export default async function selectDeviceType(req) {
   const {
@@ -27,13 +27,12 @@ export default async function selectDeviceType(req) {
     },
   } = req;
 
-  console.log('CONTEXT::::::::::', req.context);
   await ack();
 
   try {
     logger.info(`Bug report ${bugReport.id} select-device-type ${value}`);
     bugReport.device.type = value;
-    convoStore.save(bugReport);
+    await db().save(bugReport);
 
     await ack();
 

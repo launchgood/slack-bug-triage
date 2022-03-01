@@ -27,7 +27,6 @@ class BugReport {
 
     this.permalink = null;
 
-    // https://docs.github.com/en/rest/reference/issues#get-an-issue
     this.githubIssue = null;
   }
 
@@ -37,35 +36,36 @@ class BugReport {
 
   toJSON() {
     const {
-      id,
       userId,
       parentEvent,
+      greetEvent,
+      userProfile,
       device,
       basics,
       body,
       title,
       files,
+      permalink,
+      githubIssue,
+
     } = this;
     return {
-      id,
       userId,
       parentEvent,
+      greetEvent,
+      userProfile,
       device,
       basics,
       body,
       title,
       files,
+      permalink,
+      githubIssue,
     };
   }
 
   get githubMarkdown() {
     return `
-<!--
-BEGIN SLACK METADATA
-${JSON.stringify(this.toJSON(), null, 2)}
-END SLACK METADATA
--->
-
 
 ## 🪲  Bug Basics
 
@@ -97,7 +97,7 @@ ${this.filesMarkdown}
 
 [Reported on Slack by ${this.userProfile.real_name}](${this.permalink})
 
-- Device: ${this.deviceTypeIcon} ${this.device.type};
+- Device: ${this.deviceTypeIcon} ${this.device.type}
 - OS: ${this.osIcon} ${this.device.os}
 - Browser: ${this.device.browser}
 
@@ -146,6 +146,19 @@ ${this.filesMarkdown}
 
 BugReport.buildId = function buildId(parentEvent) {
   return `${parentEvent.thread_ts || parentEvent.ts}`;
+};
+
+BugReport.build = (data) => {
+  const { parentEvent } = data;
+  if (!parentEvent) {
+    throw new Error('Cannot instantiate BugReport without parentEvent');
+  }
+  const report = new BugReport(parentEvent);
+  Object.keys(data)
+    .forEach((key) => {
+      report[key] = data[key];
+    });
+  return report;
 };
 
 export default BugReport;
