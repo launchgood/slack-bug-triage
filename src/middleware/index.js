@@ -1,37 +1,21 @@
 import * as action from './action/index';
 import beginOrResumeConvo from './begin-or-resume-convo';
 import greet from './greet';
-import uploadFilesToAws from './upload-files-to-aws';
+import ignoreNonMessageEvents from './ignore-non-message-events';
+import noBotMessages from './no-bot-messages';
+import noReplies from './no-replies';
 import noop from './noop';
-
-const noBotMessages = async ({ logger, message, next }) => {
-  if (message.subtype !== 'bot_message') {
-    logger.debug('Handling non-bot...');
-    await next();
-  }
-};
-
-const noReplies = async ({ event, logger, next }) => {
-  if (!event.thread_ts) {
-    logger.debug('Handling non-reply...');
-    await next();
-  }
-};
-
-const repliesOnly = async ({ event, logger, next }) => {
-  if (event.thread_ts) {
-    logger.debug('Handling reply...');
-    await next();
-  }
-};
+import repliesOnly from './replies-only';
+import uploadFilesToAws from './upload-files-to-aws';
 
 export {
   action,
   beginOrResumeConvo,
   greet,
-  noop,
+  ignoreNonMessageEvents,
   noBotMessages,
   noReplies,
+  noop,
   repliesOnly,
   uploadFilesToAws,
 };

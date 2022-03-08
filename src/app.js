@@ -7,6 +7,7 @@ import {
   action,
   beginOrResumeConvo,
   greet,
+  ignoreNonMessageEvents,
   noop,
   noBotMessages,
   noReplies,
@@ -30,6 +31,16 @@ const s3 = new AWS.S3({
 // eslint-disable-next-line new-cap
 const octokit = new github.getOctokit(env.GITHUB_TOKEN);
 
+// middleware to handle attachments
+const uploadFiles = uploadFilesToAws({
+  AWS_S3_BUCKET: env.AWS_S3_BUCKET,
+  SLACK_BOT_TOKEN: env.SLACK_BOT_TOKEN,
+  octokit,
+  owner: env.GITHUB_OWNER,
+  repo: env.GITHUB_REPO,
+  s3,
+});
+
 const { App, LogLevel } = bolt;
 const app = new App({
   token: env.SLACK_BOT_TOKEN,
@@ -41,19 +52,12 @@ const app = new App({
   appToken: env.SLACK_APP_TOKEN,
 });
 
+// initialize DB with app logger
 initDb(env.REDIS_URL, app.logger);
 
 // start convo for each message, if one does not already exist
+app.use(ignoreNonMessageEvents);
 app.use(beginOrResumeConvo);
-
-const uploadFiles = uploadFilesToAws({
-  AWS_S3_BUCKET: env.AWS_S3_BUCKET,
-  SLACK_BOT_TOKEN: env.SLACK_BOT_TOKEN,
-  octokit,
-  owner: env.GITHUB_OWNER,
-  repo: env.GITHUB_REPO,
-  s3,
-});
 
 // sends intro dialog first, then processes files
 app.message(noBotMessages, noReplies, greet, uploadFiles, noop);

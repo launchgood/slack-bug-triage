@@ -1,7 +1,7 @@
 import axios from 'axios';
 import {
   BUG_REPORT_WITH_ACTIONS,
-  INITIAL_MESSAGE
+  INITIAL_MESSAGE,
 } from '../dialog/index';
 import db from '../db/index';
 
@@ -15,6 +15,7 @@ export default function uploadFilesToAws(imports) {
     s3,
   } = imports;
 
+  // eslint-disable-next-line consistent-return
   return async (req) => {
     const {
       client,
@@ -24,19 +25,17 @@ export default function uploadFilesToAws(imports) {
       next,
       payload,
     } = req;
-    logger.info('Handling message...');
 
     const { files } = payload;
     const { bugReport } = context;
 
     if (!files) {
-      logger.info('No files to process...');
-      await next();
-      return;
+      logger.info(`Bug report ${bugReport.id} no files to process...`);
+      return next();
     }
 
     try {
-      logger.info(`Processing bug report ${bugReport.id} ${files.length} files...`);
+      logger.info(`Bug report ${bugReport.id} ${files.length} files...`);
       const uploadedFiles = await (Promise.all(
         files.map(async (file) => {
           logger.debug(`  > File: ${file.id}`, file);
@@ -47,7 +46,7 @@ export default function uploadFilesToAws(imports) {
             },
             responseType: 'arraybuffer',
           });
-          logger.debug()
+          logger.debug();
 
           const filename = `slack-upload-${file.id}.${file.filetype}`;
           const uploadParams = {
@@ -56,7 +55,7 @@ export default function uploadFilesToAws(imports) {
             Body: res1.data,
           };
 
-          logger.info(`Uploading ${filename} to AWS...`);
+          logger.info(`Bug report ${bugReport.id} uploading ${filename} to AWS...`);
           const res2 = await (new Promise((resolve, reject) => {
             // call S3 to retrieve upload file to specified bucket
             s3.upload(uploadParams, (err, data) => {
@@ -67,7 +66,7 @@ export default function uploadFilesToAws(imports) {
               }
             });
           }));
-          logger.debug('File upload to S3 OK:', res2);
+          logger.debug(`Bug report ${bugReport.id} file upload to S3 OK:`, res2);
 
           // Upload the file to a new channel using the file buffer (requires files:write scope)
           // const slack = await client.files.upload({
@@ -148,12 +147,12 @@ export default function uploadFilesToAws(imports) {
       if (bugReport && bugReport.files) {
         await assignToConversation(bugReport);
       } else {
-        logger.info('Looking up bug report for event...');
-        const convo = await db().findForEvent(event);
-        if (convo) {
-          logger.info(`Bug report ${convo.id} found`);
-          logger.debug(`Bug report ${convo.id} is:`, convo);
-          await assignToConversation(convo);
+        const foundBugReport = await db().findForEvent(event);
+        logger.info(`Bug report ${foundBugReport.id} Looking up bug report for event...`);
+        if (foundBugReport) {
+          logger.info(`Bug report ${foundBugReport.id} found`);
+          logger.debug(`Bug report ${foundBugReport.id} is:`, foundBugReport);
+          await assignToConversation(foundBugReport);
         } else {
           logger.error('Could not find bug report for event:', event);
         }
