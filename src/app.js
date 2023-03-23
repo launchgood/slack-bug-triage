@@ -74,6 +74,7 @@ app.view({ type: 'view_submission' }, action.viewSubmit({
   octokit,
   owner: env.GITHUB_OWNER,
   repo: env.GITHUB_REPO,
+  webhookUrl: env.WEBHOOK_URL,
 }));
 
 (async () => {

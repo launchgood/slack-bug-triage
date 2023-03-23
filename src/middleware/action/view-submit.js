@@ -1,4 +1,5 @@
 import objectMapper from 'object-mapper';
+import axios from 'axios';
 import { BUG_REPORT_WITH_ACTIONS } from '../../dialog/index';
 import db from '../../db/index';
 
@@ -8,6 +9,7 @@ export default function (imports) {
     octokit,
     owner,
     repo,
+    webhookUrl,
   } = imports;
 
   return async function viewSubmit(req) {
@@ -82,6 +84,23 @@ export default function (imports) {
       logger.info(`Conversation ${bugReport.id} created Github issue #${data.number}`, data);
       bugReport.githubIssue = data;
       await db().save(bugReport);
+
+      logger.info(`Triggering webhook...`);
+      const { data: webhookData } = await axios.request({
+        method: 'post',
+        url: webhookUrl,
+        data,
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json',
+        },
+      });
+      const { result: webhookResult } = webhookData;
+      if ('success' === webhookResult) {
+        logger.info(`Triggered webhook OK:`, webhookData);
+      } else {
+        logger.error(`Error triggering webhook:`, webhookData);
+      }
 
       logger.info(`Conversation ${bugReport.id} updating message...`, bugReport);
       const msg = BUG_REPORT_WITH_ACTIONS(bugReport)
