@@ -18,7 +18,8 @@ export const INPUT_BUG_BASICS = {
 					"type": "plain_text",
 					"text": "Example: computer turns homicidal after incorrect diagnostic"
 				},
-				"min_length": 10
+				"min_length": 10,
+				"max_length": 150,
 			},
 			"label": {
 				"type": "plain_text",
